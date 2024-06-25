@@ -1,16 +1,14 @@
-package webCalendarSpring.presentation;
+package com.markort147.simplecalendarwebapi.presentation;
 
+import com.markort147.simplecalendarwebapi.business.Event;
+import com.markort147.simplecalendarwebapi.business.EventService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import webCalendarSpring.business.Event;
-import webCalendarSpring.business.EventService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,28 +26,26 @@ public class EventController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getEventById(@PathVariable("id") Long id) {
+    public ResponseEntity<Object> getEventById(@PathVariable("id") Long id) {
         Optional<Event> event = eventService.getById(id);
         if (event.isPresent()) {
             return ResponseEntity.ok(event.get());
-        } else {
-            return new ResponseEntity<>(Map.of("message", "The event doesn't exist!"), HttpStatus.NOT_FOUND);
         }
+        return new ResponseEntity<>(Map.of("message", "The event doesn't exist!"), HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteEvent(@PathVariable("id") Long id) {
+    public ResponseEntity<Object> deleteEvent(@PathVariable("id") Long id) {
         Optional<Event> event = eventService.getById(id);
         if (event.isPresent()) {
             eventService.remove(event.get());
             return ResponseEntity.ok(event.get());
-        } else {
-            return new ResponseEntity<>(Map.of("message", "The event doesn't exist!"), HttpStatus.NOT_FOUND);
         }
+        return new ResponseEntity<>(Map.of("message", "The event doesn't exist!"), HttpStatus.NOT_FOUND);
     }
 
     @GetMapping
-    public ResponseEntity<?> getEventsByDateRange(
+    public ResponseEntity<List<Event>> getEventsByDateRange(
             @RequestParam(name = "start_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateMin,
             @RequestParam(name = "end_time", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate dateMax) {
         List<Event> events;
@@ -66,21 +62,20 @@ public class EventController {
     }
 
     @GetMapping("/today")
-    public ResponseEntity<?> getTodayEvents() {
-        List<Event> todayEvents = eventService.getTodayEvents();
-        return ResponseEntity.ok(todayEvents);
+    public ResponseEntity<List<Event>> getTodayEvents() {
+        return ResponseEntity.ok(eventService.getTodayEvents());
     }
 
     @PostMapping
-    public ResponseEntity<?> postEvent(@RequestBody @Valid Event event, BindingResult result) {
+    public ResponseEntity<Map<String, String>> postEvent(@RequestBody @Valid Event event, BindingResult result) {
         if (result.hasErrors()) {
-            return ResponseEntity.badRequest().body("");
+            return ResponseEntity.badRequest().build();
         } else {
             eventService.save(event);
             return ResponseEntity.ok(
                     Map.of(
                             "message", "The event has been added!",
-                            "event", event.getEvent(),
+                            "event", event.getName(),
                             "date", event.getDate().toString()
                     )
             );

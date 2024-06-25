@@ -1,8 +1,8 @@
-package webCalendarSpring.business;
+package com.markort147.simplecalendarwebapi.business;
 
+import com.markort147.simplecalendarwebapi.persistence.EventRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import webCalendarSpring.persistence.EventRepository;
 
 import java.time.LocalDate;
 import java.util.List;
